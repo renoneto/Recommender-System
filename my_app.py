@@ -5,9 +5,9 @@ import pandas as pd
 from surprise import Reader, Dataset
 
 # Import required data
-current_user_ratings = pd.read_csv('./data/user_movie_ratings.csv')
-movie_ratings = pd.read_csv('./data/movies_by_rating.csv')
-model = pd.read_pickle('./data/svd.pkl')['algo']
+current_user_ratings = pd.read_csv('./app/data/user_movie_ratings.csv')
+movie_ratings = pd.read_csv('./app/data/movies_by_rating.csv')
+model = pd.read_pickle('./app/data/svd.pkl')['algo']
 
 # Set default values
 n_recommendations = 5
