@@ -33,7 +33,6 @@ cryptography-vectors==2.7
 cvxpy==1.1.12
 cycler==0.10.0
 Cython==0.29.13
-dataclasses==0.8
 decorator==4.4.0
 defusedxml==0.6.0
 dill==0.3.0
