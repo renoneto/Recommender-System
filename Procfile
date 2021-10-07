@@ -1,2 +1,1 @@
-web: python my_app.py
-worker: python my_app.py
+web: sh setup.sh && streamlit run introduction_tutorial.py
