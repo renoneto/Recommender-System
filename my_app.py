@@ -1,8 +1,13 @@
-from functions import filtered_dataset
+import warnings
 
-import streamlit as st
+import numpy as np
 import pandas as pd
-from surprise import Reader, Dataset
+import streamlit as st
+from surprise import Dataset, Reader
+
+from functions import filtered_dataset, movie_picture, rename_title
+
+warnings.filterwarnings('ignore')
 
 # Import required data
 current_user_ratings = pd.read_csv('./app/data/user_movie_ratings.csv')
@@ -49,7 +54,11 @@ input_ratings = []
 
 # Create select box for each movie
 for n in range(n_of_movies_to_rate):
-	user_movie_rating = st.selectbox(favorite_genre_movies_filtered.iloc[n]['title'], ratings_options)
+	movie_to_rate_title = favorite_genre_movies_filtered.iloc[n]['title']
+	renamed_title = rename_title(movie_to_rate_title)
+	movie_img_link = movie_picture(renamed_title)
+	st.image(movie_img_link, width=200)
+	user_movie_rating = st.selectbox(movie_to_rate_title, ratings_options)
 	input_ratings.append(user_movie_rating)
 
 	# Ask the user to rate the movie
@@ -68,10 +77,15 @@ if st.button('Show recommendations!'):
 			new_ratings.append({'userId': default_user_id,
 								'movieId': favorite_genre_movies_filtered.iloc[idx]['movieId'],
 								'rating': movie_rating})
+		else:
+			new_ratings.append({'userId': np.nan,
+									'movieId': np.nan,
+									'rating': np.nan})
 
 	# Append new ratings to existing dataset
 	new_ratings_df = pd.DataFrame(new_ratings)
 	updated_df = pd.concat([new_ratings_df, current_user_ratings])
+	updated_df = updated_df.dropna()
 
 	# Transform data set
 	reader = Reader()

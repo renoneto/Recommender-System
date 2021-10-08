@@ -1,4 +1,9 @@
+import re
+
+import numpy as np
 import pandas as pd
+import requests
+from bs4 import BeautifulSoup
 
 def weighted_rating(df):
     """
@@ -19,13 +24,21 @@ def weighted_rating(df):
     return (v / (v+m) * R) + (m / (m+v) * C)
 
 def filtered_dataset(genre, ratings_movies_df):
+    """Filters list of movies to show only movies of the chosen genre. Calculates
+    the 95th quantile of No. of Ratings to keep only relevant movies.
 
+    Args:
+        genre (str): Genre name
+        ratings_movies_df (pd.DataFrame): Dataframe with Movie Ratings
+
+    Returns:
+        genre_df[pd.DataFrame]: Filtered Dataframe with relevant movies for the genre
+    """
     # Keep only the selected genre
     genre_df = ratings_movies_df[ratings_movies_df['genres'].str.contains(genre)]
 
     # Calculate the 95th quantile and the weighted rating
     minimum_no_of_ratings = genre_df['count_rating'].quantile(0.95)
-    print(minimum_no_of_ratings)
     genre_df['minimum_no_of_ratings'] = minimum_no_of_ratings
     genre_df['weighted_rating'] = genre_df.apply(weighted_rating, axis=1)
 
@@ -42,3 +55,61 @@ def filtered_dataset(genre, ratings_movies_df):
                          'minimum_no_of_ratings', 'weighted_rating']]
 
     return genre_df
+
+def movie_picture(movie_name):
+    """A function to find a movie's picture from IMDB
+
+    Args:
+        movie_name (str): Movie Name
+
+    Returns:
+        movie_image_link[str]: IMDB's Link to JPEG Image of the Movie
+    """
+    # Reformat name
+    movie_name_formatted = movie_name.replace(' ', '+')
+
+    # Create URL
+    url = f'https://www.imdb.com/find?q={movie_name_formatted}&ref_=nv_sr_sm'
+
+    # Search for the movie
+    page = requests.get(url)
+    soup = BeautifulSoup(page.content, 'html.parser')
+
+    # Grab link from the first result
+    first_result = soup.find(class_='findResult odd')
+    movie_link = first_result.find('a').attrs['href']
+
+    # Create IMDB movie link
+    new_url = 'https://www.imdb.com' + movie_link
+
+    # Go Movie's Page
+    movie_page = requests.get(new_url)
+    soup = BeautifulSoup(movie_page.content, 'html.parser')
+
+    # Movie JPEG link
+    movie_image_link = soup.find(class_='ipc-image').attrs['src']
+
+    return movie_image_link
+
+def rename_title(title):
+    """Function to rename a title
+
+    Args:
+        title (str): Original Title in wrong format
+
+    Returns:
+        new_title[str]: Fixed movie title in the correct format
+    """
+    # Extract year from title
+    year = title.strip()[-5:][:-1]
+
+    # Confirms if it's a valid year number
+    if len(re.findall("[0-9]{4}", year)) != 1:
+        year = np.nan
+    if year != np.nan:
+        title = title[:-6].strip()
+
+    # Create new title
+    new_title = " ".join(title.split(", ")[::-1])
+
+    return new_title
