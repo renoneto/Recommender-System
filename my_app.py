@@ -55,9 +55,9 @@ input_ratings = []
 # Create select box for each movie
 for n in range(n_of_movies_to_rate):
 	movie_to_rate_title = favorite_genre_movies_filtered.iloc[n]['title']
-	renamed_title = rename_title(movie_to_rate_title)
-	movie_img_link = movie_picture(renamed_title)
-	st.image(movie_img_link, width=200)
+	#renamed_title = rename_title(movie_to_rate_title)
+	#movie_img_link = movie_picture(renamed_title)
+	#st.image(movie_img_link, width=200)
 	user_movie_rating = st.selectbox(movie_to_rate_title, ratings_options)
 	input_ratings.append(user_movie_rating)
 
