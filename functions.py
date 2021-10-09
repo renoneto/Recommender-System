@@ -3,6 +3,7 @@ import re
 import numpy as np
 import pandas as pd
 import requests
+import streamlit as st
 from bs4 import BeautifulSoup
 
 def weighted_rating(df):
@@ -56,7 +57,8 @@ def filtered_dataset(genre, ratings_movies_df):
 
     return genre_df
 
-def movie_picture(movie_name):
+@st.cache(suppress_st_warning=True, show_spinner=False)
+def movie_picture(imdb_id):
     """A function to find a movie's picture from IMDB
 
     Args:
@@ -65,25 +67,16 @@ def movie_picture(movie_name):
     Returns:
         movie_image_link[str]: IMDB's Link to JPEG Image of the Movie
     """
-    # Reformat name
-    movie_name_formatted = movie_name.replace(' ', '+')
-
-    # Create URL
-    url = f'https://www.imdb.com/find?q={movie_name_formatted}&ref_=nv_sr_sm'
-
-    # Search for the movie
-    page = requests.get(url)
-    soup = BeautifulSoup(page.content, 'html.parser')
-
-    # Grab link from the first result
-    first_result = soup.find(class_='findResult odd')
-    movie_link = first_result.find('a').attrs['href']
-
     # Create IMDB movie link
-    new_url = 'https://www.imdb.com' + movie_link
+    new_url = 'https://www.imdb.com/title/tt' + str(imdb_id)
+
+    # Define headers
+    HEADERS = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) '\
+                         'AppleWebKit/537.36 (KHTML, like Gecko) '\
+                         'Chrome/75.0.3770.80 Safari/537.36'}
 
     # Go Movie's Page
-    movie_page = requests.get(new_url)
+    movie_page = requests.get(new_url, headers=HEADERS)
     soup = BeautifulSoup(movie_page.content, 'html.parser')
 
     # Movie JPEG link
