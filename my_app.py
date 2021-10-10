@@ -24,7 +24,7 @@ default_user_id = 999999
 movie_image_links = ['nolink' for i in range(n_of_movies_to_rate)]
 
 # Set page title
-st.set_page_config(page_title="Movies Recommendation")
+st.set_page_config(page_title="Movies Recommendation", page_icon=':clapper:')
 st.write('# What movies to watch next? :clapper:')
 st.subheader("Select a genre, rate five movies and I'm going to tell you what to watch next :crystal_ball:")
 
