@@ -17,7 +17,6 @@ imdb_links = pd.read_csv('./app/data/links.csv', dtype={'movieId': 'str',
 														'imdbId': 'str',
 														'tmdbId': 'str'})
 
-print('running')
 # Set default values
 n_recommendations = 5
 n_of_movies_to_rate = 5
@@ -31,8 +30,8 @@ st.subheader("Select a genre, rate five movies and I'm going to tell you what to
 
 # Ask first question
 st.write('#### :one: Please select your favorite genre')
-genres = ('-', 'Action', 'Adventure', 'Animation', 'Children', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Fantasy',
-		  'Film-Noir', 'Horror', 'IMAX', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller', 'War', 'Western')
+genres = ['-', 'Action', 'Adventure', 'Animation', 'Children', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Fantasy',
+		  'Film-Noir', 'Horror', 'IMAX', 'Musical', 'Mystery', 'Romance', 'Sci-Fi', 'Thriller', 'War', 'Western']
 selected_genre = st.selectbox('Genres:', genres)
 
 # If user hasn't chosen a genre, prompt the user to choose one
@@ -80,14 +79,17 @@ with st.form(key='form'):
 				# Create the movie image link from IMDB
 				movie_img_link = movie_picture(imdb_id)
 				movie_image_links[i] = movie_img_link
-				print(movie_image_links)
+
 			st.image(movie_image_links[i], width=150)
+
 
 		# Second will have the rating radio form
 		with row1_2:
 			user_movie_rating = st.radio(movie_to_rate_title,
 										 ratings_options,
 										 key=i)
+			imdb_link = 'https://www.imdb.com/title/tt' + imdb_id
+			st.markdown(f'[IMDb link]({imdb_link})')
 		# Add rating to list
 		input_ratings.append(user_movie_rating)
 
@@ -138,16 +140,31 @@ if submitted:
 		ranked_movies = ranked_movies[ranked_movies['movieId'].isin(favorite_genre_movies['movieId'])]
 
 		# Show the recommendations
-		st.write('### Here are the recommendations')
+		st.write('### :three: Here are your recommendations')
+
 
 		# If there aren't enough movies to recommend then show only what's in there
 		if len(ranked_movies) < n_recommendations:
 			n_recommendations = len(ranked_movies)
 
+		# For each movie create three columns
+		cols = st.columns(5)
+
 		# Show recommendations
 		for row in range(n_recommendations):
 			movie_id = ranked_movies.iloc[row]['movieId']
+			imdb_id = imdb_links[imdb_links['movieId'].astype(float) == movie_id].iloc[0]['imdbId']
+			imdb_link = 'https://www.imdb.com/title/tt' + imdb_id
 			recommended_title = movie_ratings[movie_ratings['movieId'] == movie_id]['title'].item()
-			st.write(f'###### #{row+1} {recommended_title}')
+
+			# The first will contain the image
+			with cols[row]:
+				# Create the movie image link from IMDB
+				movie_img_link = movie_picture(imdb_id)
+				st.image(movie_img_link, width=125)
+				st.markdown(f'###### #{row+1} [{recommended_title}]({imdb_link})')
+
+
+
 
 		st.success('Done!')
